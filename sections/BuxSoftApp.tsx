@@ -126,7 +126,7 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
               <Sparkles size={16} />
               {setting(data, "hero_badge", "Google Sheets CMS")}
             </div>
-            <h1 className="max-w-5xl text-balance bg-gradient-to-br from-white via-blue-50 to-violet-200 bg-clip-text text-[46px] font-bold leading-[1.02] tracking-[-0.05em] text-transparent drop-shadow-[0_20px_60px_rgba(255,255,255,0.08)] sm:text-6xl lg:text-[84px]">
+            <h1 className="max-w-5xl text-balance bg-gradient-to-br from-white via-blue-50 to-violet-200 bg-clip-text text-[44px] font-bold leading-[1.14] tracking-[-0.035em] text-transparent drop-shadow-[0_20px_60px_rgba(255,255,255,0.08)] sm:text-6xl lg:text-[78px]">
               {setting(data, "hero_title", "Buxgalteriya va soliq ishlaringizni avtomatlashtiring")}
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-xl">
