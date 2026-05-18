@@ -126,7 +126,7 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
               <Sparkles size={16} />
               {setting(data, "hero_badge", "Google Sheets CMS")}
             </div>
-            <h1 className="max-w-4xl overflow-visible pb-4 text-balance bg-gradient-to-br from-white via-slate-100 to-cyan-100 bg-clip-text text-[38px] font-semibold leading-[1.22] tracking-[-0.02em] text-transparent drop-shadow-[0_18px_50px_rgba(255,255,255,0.06)] sm:text-5xl lg:text-[62px]">
+            <h1 className="max-w-5xl overflow-visible pb-3 text-balance text-[44px] font-bold leading-[1.12] tracking-[-0.035em] text-white drop-shadow-[0_24px_70px_rgba(255,255,255,0.08)] sm:text-6xl lg:text-[76px]">
             <p className="mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-xl">
               {setting(data, "hero_subtitle", "Faoliyat turini tanlang, tarif va xizmatlarni ko‘ring.")}
             </p>
