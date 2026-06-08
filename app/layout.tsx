@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "BuxSoft — Google Sheets CMS Accounting Platform",
-  description: "Premium accounting SaaS website powered by Google Sheets CMS."
+  description: "Premium accounting SaaS website powered by Google Sheets CMS.",
+  icons: []
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

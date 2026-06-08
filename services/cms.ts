@@ -88,7 +88,10 @@ export async function getCmsData(): Promise<CmsData> {
   if (!API_URL) return normalizeCmsData(fallbackData);
 
   try {
-    const res = await fetch(API_URL, { cache: "no-store" });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 7000);
+    const res = await fetch(API_URL, { cache: "no-store", signal: controller.signal });
+    clearTimeout(timer);
     if (!res.ok) return normalizeCmsData(fallbackData);
     const json = await res.json();
     if (!json.success) return normalizeCmsData(fallbackData);
