@@ -1,4 +1,4 @@
-// File: E:\amir\buxsoft-clean\app\layout.tsx
+// File: e:\amir\buxsoft-clean\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
