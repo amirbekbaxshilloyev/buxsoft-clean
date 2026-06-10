@@ -1,1 +1,5 @@
 node_modules
+.next
+.netlify
+.env.local
+.env
