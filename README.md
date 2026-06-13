@@ -1,4 +1,4 @@
-# BuxSoft Google Sheets CMS Website
+# BuxSoft 
 
 Bu paket Google Sheets orqali boshqariladigan BuxSoft sayti uchun clean final variant.
 
