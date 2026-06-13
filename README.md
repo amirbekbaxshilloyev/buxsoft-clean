@@ -1,7 +1,4 @@
 # BuxSoft 
-
-Bu paket Google Sheets orqali boshqariladigan BuxSoft sayti uchun clean final variant.
-
 ## Muhim environment variable
 
 Vercel → Project → Settings → Environment Variables:
