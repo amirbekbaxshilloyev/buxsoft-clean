@@ -1,5 +1,8 @@
-node_modules
-.next
-.netlify
-.env.local
 .env
+.env.local
+.netlify
+.next
+node_modules
+nul
+Nul
+NUL
