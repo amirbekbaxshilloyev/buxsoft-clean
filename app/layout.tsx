@@ -37,8 +37,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="bg-blob bg-blob--1" aria-hidden />
           <div className="bg-blob bg-blob--2" aria-hidden />
           {children}
-          <TelegramFloat />
         </SmoothScrollProvider>
+        <TelegramFloat />
 
         <Script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/lib/vanilla-tilt.min.js" strategy="afterInteractive" />
         <Script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js" strategy="lazyOnload" />
