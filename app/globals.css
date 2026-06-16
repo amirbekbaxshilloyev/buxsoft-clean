@@ -423,6 +423,53 @@ html.light a[class*="hover\:bg-white\/10"]:hover {
 }
 
 /* ══════════════════════════════════════════════════
+   TELEGRAM FLOATING BUTTON
+══════════════════════════════════════════════════ */
+.tg-float {
+  position: fixed;
+  bottom: 2rem;
+  right: 1.75rem;
+  z-index: 999;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #229ED9;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 24px rgba(34,158,217,.45);
+  animation: tg-float 3.2s ease-in-out infinite;
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  text-decoration: none;
+}
+.tg-float:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 8px 32px rgba(34,158,217,.65);
+  animation-play-state: paused;
+}
+
+/* soft pulse ring */
+.tg-float__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(34,158,217,.35);
+  animation: tg-pulse 2.4s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes tg-float {
+  0%, 100% { transform: translateY(0);   }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes tg-pulse {
+  0%   { transform: scale(1);   opacity: .7; }
+  70%  { transform: scale(1.6); opacity: 0;  }
+  100% { transform: scale(1.6); opacity: 0;  }
+}
+
+/* ══════════════════════════════════════════════════
    REDUCED MOTION
 ══════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
