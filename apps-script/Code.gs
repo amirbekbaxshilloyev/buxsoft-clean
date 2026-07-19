@@ -8,6 +8,8 @@ const CONFIG = {
     TESTIMONIALS: 'TESTIMONIALS',
     FAQ: 'FAQ',
     STATS: 'STATS',
+    PROBLEMS: 'PROBLEMS',
+    PROCESS: 'PROCESS',
     LEADS: 'LEADS',
   },
 };
@@ -41,7 +43,16 @@ function getWebsiteContent() {
     testimonials: readTable(CONFIG.SHEETS.TESTIMONIALS),
     faq: readTable(CONFIG.SHEETS.FAQ),
     stats: readTable(CONFIG.SHEETS.STATS),
+    problems: readTableSafe(CONFIG.SHEETS.PROBLEMS),
+    process: readTableSafe(CONFIG.SHEETS.PROCESS),
   };
+}
+
+/* Sheet hali yaratilmagan bo'lsa xato bermay bo'sh ro'yxat qaytaradi */
+function readTableSafe(sheetName) {
+  var sheet = getSpreadsheet().getSheetByName(sheetName);
+  if (!sheet) return [];
+  return readTable(sheetName);
 }
 
 function getSpreadsheet() {

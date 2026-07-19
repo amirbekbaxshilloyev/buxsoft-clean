@@ -62,6 +62,22 @@ export type Stat = {
   sort?: number;
 };
 
+export type Problem = {
+  id: string;
+  pain: string;
+  solution: string;
+  active?: boolean;
+  sort?: number;
+};
+
+export type ProcessStep = {
+  id: string;
+  title: string;
+  text: string;
+  active?: boolean;
+  sort?: number;
+};
+
 export type CmsData = {
   settings: Settings;
   categories: Category[];
@@ -70,6 +86,8 @@ export type CmsData = {
   testimonials: Testimonial[];
   faq: Faq[];
   stats: Stat[];
+  problems: Problem[];
+  process: ProcessStep[];
 };
 
 export type LeadPayload = {

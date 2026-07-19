@@ -14,40 +14,6 @@ declare global {
   }
 }
 
-/* ── Muammo → yechim kartalari (kontentni shu yerda tahrirlash mumkin) ── */
-const PROBLEMS = [
-  {
-    pain: "Soliq tekshiruvi kelsa, hujjatlarim tayyormi — bilmayman",
-    fix: "Tekshiruvdan oldin to‘liq audit o‘tkazamiz va kamchiliklarni oldindan yopamiz.",
-  },
-  {
-    pain: "Buxgalterim ketib qoldi, hisobotlar to‘xtab qoldi",
-    fix: "Ishni 24 soat ichida qabul qilib olamiz — birorta muddat o‘tib ketmaydi.",
-  },
-  {
-    pain: "EHF, QQS, yangi qonunlar — boshim qotib qoldi",
-    fix: "Qonun o‘zgarishlarini biz kuzatamiz, siz faqat biznesingiz bilan shug‘ullanasiz.",
-  },
-  {
-    pain: "Jarima kelib qoladi, sababini ham bilmayman",
-    fix: "Hisobotlar har oy muddatidan oldin topshiriladi — nazorat to‘liq bizda.",
-  },
-  {
-    pain: "Shtatdagi buxgalter qimmat: oylik, soliqlar, ta’til...",
-    fix: "Autsorsing shtat buxgalterdan sezilarli arzon — faqat xizmat uchun to‘laysiz.",
-  },
-  {
-    pain: "Narxlar shaffof emas, oxirida qo‘shimcha to‘lovlar chiqadi",
-    fix: "Narxni saytda o‘zingiz hisoblaysiz — shartnomadagi narx o‘zgarmaydi.",
-  },
-];
-
-const PROCESS = [
-  { title: "Bepul diagnostika", text: "Qo‘ng‘iroq qilamiz, holatingizni o‘rganamiz va aniq taklif beramiz." },
-  { title: "Og‘riqsiz o‘tish", text: "Hujjatlar va bazani o‘zimiz qabul qilib olamiz — ishingiz bir kun ham to‘xtamaydi." },
-  { title: "Doimiy yurituv", text: "Hisobotlar muddatida topshiriladi, har oy holat bo‘yicha hisobot berib boramiz." },
-];
-
 /* ── Stat counter: raqam yuqoridan tushib, gold chiziq chiqadi ── */
 function StatCounter({ stat }: { stat: Stat }) {
   const target  = parseFloat(String(stat.value).replace(/[^\d.-]/g, "")) || 0;
@@ -296,18 +262,18 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
       {/* MUAMMO → YECHIM */}
       <section id="problems" className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div data-reveal="up">
-          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">Muammo → yechim</p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Tanish muammolarmi?</h2>
+          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">{setting(data, "problems_badge", "Muammo → yechim")}</p>
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">{setting(data, "problems_title", "Tanish muammolarmi?")}</h2>
           <p className="mt-3 max-w-2xl text-slate-300">
-            Har kuni tadbirkorlardan eshitadigan og‘riqlar — birini oching, yechimini ko‘ring.
+            {setting(data, "problems_subtitle", "Har kuni tadbirkorlardan eshitadigan og‘riqlar — birini oching, yechimini ko‘ring.")}
           </p>
         </div>
         <div data-reveal-group className="mt-8 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {PROBLEMS.map((p, i) => {
+          {data.problems.map((p, i) => {
             const open = openProblem === i;
             return (
               <div
-                key={p.pain}
+                key={p.id}
                 data-reveal-child
                 className={cn(
                   "glass relative flex flex-col overflow-hidden rounded-3xl p-6 pl-7 transition duration-200",
@@ -343,7 +309,7 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
                   <div className="wizard-step-enter mt-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 p-4">
                     <div className="flex gap-3">
                       <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" strokeWidth={2} />
-                      <p className="text-sm leading-6 text-emerald-50">{p.fix}</p>
+                      <p className="text-sm leading-6 text-emerald-50">{p.solution}</p>
                     </div>
                     <a
                       href="#wizard"
@@ -362,12 +328,12 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
       {/* QANDAY ISHLAYMIZ + KAFOLAT */}
       <section className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div data-reveal="up">
-          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">3 qadam</p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Qanday ishlaymiz?</h2>
+          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">{setting(data, "process_badge", "3 qadam")}</p>
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">{setting(data, "process_title", "Qanday ishlaymiz?")}</h2>
         </div>
         <div data-reveal-group className="mt-8 grid gap-4 sm:grid-cols-3">
-          {PROCESS.map((s, i) => (
-            <div key={s.title} data-reveal-child className="glass rounded-3xl p-6">
+          {data.process.map((s, i) => (
+            <div key={s.id} data-reveal-child className="glass rounded-3xl p-6">
               <div className="text-4xl font-black text-white/15">0{i + 1}</div>
               <h3 className="mt-3 text-lg font-black">{s.title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">{s.text}</p>
@@ -383,16 +349,16 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
             <div className="text-4xl">🛡️</div>
             <div>
               <h3 className="text-xl font-black sm:text-2xl">
-                Bizning aybimiz bilan jarima chiqsa — zararni o‘zimiz qoplaymiz
+                {setting(data, "guarantee_title", "Bizning aybimiz bilan jarima chiqsa — zararni o‘zimiz qoplaymiz")}
               </h3>
-              <p className="mt-2 text-slate-300">Bu og‘zaki va’da emas — shartnomada yozib beriladi.</p>
+              <p className="mt-2 text-slate-300">{setting(data, "guarantee_text", "Bu og‘zaki va’da emas — shartnomada yozib beriladi.")}</p>
             </div>
           </div>
           <a
             href="#wizard"
             className="btn-glow shrink-0 rounded-full bg-white px-6 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-100"
           >
-            Bepul konsultatsiya
+            {setting(data, "guarantee_cta", "Bepul konsultatsiya")}
           </a>
         </div>
       </section>
@@ -400,8 +366,8 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
       {/* WIZARD */}
       <section id="wizard" className="relative mx-auto max-w-4xl scroll-mt-8 px-4 py-12 sm:px-6 lg:px-8">
         <div data-reveal="up" className="mb-8 text-center">
-          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">Bir daqiqada</p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Bepul konsultatsiya oling</h2>
+          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">{setting(data, "wizard_badge", "Bir daqiqada")}</p>
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">{setting(data, "wizard_title", "Bepul konsultatsiya oling")}</h2>
         </div>
         <Wizard data={data} />
       </section>
