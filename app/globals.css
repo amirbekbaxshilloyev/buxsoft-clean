@@ -5,50 +5,53 @@
 /* ══════════════════════════════════════════════════
    DESIGN TOKENS — dark (default) + light overrides
 ══════════════════════════════════════════════════ */
+/* BRAND: Navy #0B1F4D (60%) · Oq (25%) · Electric Blue #1E63FF (10%) · Oltin #C9A54B (5%) */
 :root, html.dark {
   color-scheme: dark;
   --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
-  --gold: #c4a23a;
+  --gold:  #C9A54B;
+  --blue:  #1E63FF;
+  --navy:  #0B1F4D;
 
-  --c-bg:      #020617;
+  --c-bg:      #060F26;
   --c-text:    #f8fafc;
-  --c-muted:   #94a3b8;
+  --c-muted:   #93a6cc;
   --c-border:  rgba(255,255,255,.10);
   --c-border2: rgba(255,255,255,.15);
   --c-surf:    rgba(255,255,255,.05);
   --c-surf2:   rgba(255,255,255,.10);
-  --c-glass:   linear-gradient(135deg, rgba(255,255,255,.105), rgba(255,255,255,.035));
-  --c-glass-sh:0 30px 90px rgba(0,0,0,.35);
-  --c-grid:    rgba(255,255,255,.038);
-  --c-input:   rgba(2,6,23,.62);
-  --c-nav:     rgba(2,6,23,.80);
-  --c-glow1:   rgba(34,211,238,.18);
-  --c-glow2:   rgba(168,85,247,.24);
-  --c-glow3:   rgba(37,99,235,.12);
-  --c-blob1:   rgba(109,40,217,.10);
-  --c-blob2:   rgba(29,78,216,.12);
+  --c-glass:   linear-gradient(135deg, rgba(91,140,255,.10), rgba(255,255,255,.035));
+  --c-glass-sh:0 30px 90px rgba(3,8,24,.45);
+  --c-grid:    rgba(120,155,255,.05);
+  --c-input:   rgba(6,15,38,.62);
+  --c-nav:     rgba(6,15,38,.80);
+  --c-glow1:   rgba(30,99,255,.20);
+  --c-glow2:   rgba(201,165,75,.14);
+  --c-glow3:   rgba(30,99,255,.10);
+  --c-blob1:   rgba(30,99,255,.14);
+  --c-blob2:   rgba(201,165,75,.09);
 }
 
 html.light {
   color-scheme: light;
-  --c-bg:      #f0f5fb;
-  --c-text:    #0f172a;
-  --c-muted:   #475569;
-  --c-border:  rgba(15,23,42,.09);
-  --c-border2: rgba(15,23,42,.14);
-  --c-surf:    rgba(15,23,42,.04);
-  --c-surf2:   rgba(15,23,42,.08);
-  --c-glass:   linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.70));
-  --c-glass-sh:0 16px 60px rgba(15,23,42,.10);
-  --c-grid:    rgba(15,23,42,.038);
-  --c-input:   rgba(255,255,255,.90);
-  --c-nav:     rgba(240,245,251,.88);
-  --c-glow1:   rgba(34,211,238,.08);
-  --c-glow2:   rgba(109,40,217,.09);
-  --c-glow3:   rgba(37,99,235,.07);
-  --c-blob1:   rgba(109,40,217,.06);
-  --c-blob2:   rgba(29,78,216,.07);
+  --c-bg:      #F2F4F7;
+  --c-text:    #0B1F4D;
+  --c-muted:   #45568a;
+  --c-border:  rgba(11,31,77,.10);
+  --c-border2: rgba(11,31,77,.16);
+  --c-surf:    rgba(11,31,77,.04);
+  --c-surf2:   rgba(11,31,77,.08);
+  --c-glass:   linear-gradient(135deg, rgba(255,255,255,.90), rgba(255,255,255,.72));
+  --c-glass-sh:0 16px 60px rgba(11,31,77,.10);
+  --c-grid:    rgba(11,31,77,.045);
+  --c-input:   rgba(255,255,255,.92);
+  --c-nav:     rgba(242,244,247,.88);
+  --c-glow1:   rgba(30,99,255,.10);
+  --c-glow2:   rgba(201,165,75,.09);
+  --c-glow3:   rgba(30,99,255,.06);
+  --c-blob1:   rgba(30,99,255,.08);
+  --c-blob2:   rgba(201,165,75,.07);
 }
 
 /* ══════════════════════════════════════════════════
@@ -69,11 +72,25 @@ body {
 /* ══════════════════════════════════════════════════
    BACKGROUND SYSTEM — grid + subtle floating blobs
 ══════════════════════════════════════════════════ */
+/* Scroll bilan jonlanadigan gradient fon:
+   --bx-scroll (0..1) JS'dan yangilanadi — glow'lar siljiydi va navy chuqurlashadi */
 .bg-premium {
   background:
-    radial-gradient(circle at 10% 10%, var(--c-glow1), transparent 30%),
-    radial-gradient(circle at 85%  5%, var(--c-glow2), transparent 30%),
-    radial-gradient(circle at 50% 70%, var(--c-glow3), transparent 36%),
+    radial-gradient(circle at calc(10% + var(--bx-scroll, 0) * 55%) 8%,
+      var(--c-glow1), transparent 34%),
+    radial-gradient(circle at calc(88% - var(--bx-scroll, 0) * 40%) calc(10% + var(--bx-scroll, 0) * 55%),
+      var(--c-glow2), transparent 30%),
+    radial-gradient(circle at 50% calc(75% - var(--bx-scroll, 0) * 25%),
+      var(--c-glow3), transparent 40%),
+    linear-gradient(178deg,
+      var(--c-bg) 0%,
+      color-mix(in srgb, var(--navy) calc(28% + var(--bx-scroll, 0) * 44%), var(--c-bg)) 55%,
+      var(--c-bg) 100%);
+}
+html.light .bg-premium {
+  background:
+    radial-gradient(circle at calc(10% + var(--bx-scroll, 0) * 55%) 8%, var(--c-glow1), transparent 34%),
+    radial-gradient(circle at calc(88% - var(--bx-scroll, 0) * 40%) calc(10% + var(--bx-scroll, 0) * 55%), var(--c-glow2), transparent 30%),
     var(--c-bg);
 }
 
@@ -235,12 +252,34 @@ html.light .hero-gradient-overlay { opacity: 0.05; }
 /* ══════════════════════════════════════════════════
    BUTTONS
 ══════════════════════════════════════════════════ */
+/* Liquid glass tugma — iOS launcher uslubi:
+   yarim shaffof electric-blue gradient, ustki yorug' qirra, blur, yumshoq soya */
 .btn-glow {
-  animation: glowPulse 2.5s ease-in-out infinite;
-  transition: transform 0.18s var(--ease-out), background 0.2s ease, color 0.2s ease;
+  background: linear-gradient(150deg,
+    rgba(91,140,255,.95) 0%,
+    rgba(30,99,255,.92) 45%,
+    rgba(15,70,210,.94) 100%) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -10px 18px rgba(255,255,255,.07),
+    0 8px 28px rgba(30,99,255,.38);
+  backdrop-filter: blur(14px) saturate(1.5);
+  transition: transform 0.18s var(--ease-out), box-shadow 0.25s ease, filter 0.2s ease;
   position: relative;
   overflow: hidden;
 }
+.btn-glow:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -10px 18px rgba(255,255,255,.09),
+    0 12px 36px rgba(30,99,255,.5);
+}
+.btn-glow .text-slate-950,
+.btn-glow[class*="text-slate-950"] { color: #fff !important; }
 .btn-glow::before {
   content: '';
   position: absolute;
@@ -259,8 +298,8 @@ html.light .hero-gradient-overlay { opacity: 0.05; }
 .btn-glow:active { transform: scale(0.97); }
 
 @keyframes glowPulse {
-  0%,100% { box-shadow: 0 0 18px rgba(34,211,238,.12); }
-  50%     { box-shadow: 0 0 36px rgba(34,211,238,.28); }
+  0%,100% { box-shadow: 0 0 18px rgba(30,99,255,.14); }
+  50%     { box-shadow: 0 0 36px rgba(30,99,255,.32); }
 }
 
 /* ══════════════════════════════════════════════════
@@ -279,8 +318,8 @@ html.light .hero-gradient-overlay { opacity: 0.05; }
 }
 .input::placeholder { color: var(--c-muted); }
 .input:focus {
-  border-color: rgba(196,162,58,0.7);
-  box-shadow:   0 0 0 3px rgba(196,162,58,0.11);
+  border-color: rgba(201,165,75,0.7);
+  box-shadow:   0 0 0 3px rgba(201,165,75,0.12);
 }
 
 /* ══════════════════════════════════════════════════
@@ -327,7 +366,7 @@ html.light .hero-gradient-overlay { opacity: 0.05; }
 .testimonials-swiper { padding-bottom: 0.5rem; }
 .testimonials-swiper .swiper-pagination { position: relative; margin-top: 1.5rem; }
 .testimonials-swiper .swiper-pagination-bullet { background: rgba(255,255,255,.3); opacity: 1; }
-.testimonials-swiper .swiper-pagination-bullet-active { background: #22d3ee; }
+.testimonials-swiper .swiper-pagination-bullet-active { background: #1E63FF; }
 .testimonials-swiper .swiper-slide { height: auto; }
 .testimonials-swiper .swiper-slide > div { height: 100%; }
 html.light .testimonials-swiper .swiper-pagination-bullet { background: rgba(15,23,42,.2); }
@@ -365,9 +404,13 @@ html.light .text-slate-500   { color: #94a3b8 !important; }
 html.light .text-white\/90   { color: #1e293b !important; }
 html.light .text-white\/80   { color: #334155 !important; }
 html.light .text-white\/70   { color: #475569 !important; }
-html.light .text-cyan-100    { color: #075985 !important; }
-html.light .text-cyan-300    { color: #0369a1 !important; }
-html.light .text-violet-300  { color: #5b21b6 !important; }
+html.light .text-cyan-100    { color: #0B3FA8 !important; }
+html.light .text-cyan-200    { color: #0f4fd6 !important; }
+html.light .text-cyan-300    { color: #1E63FF !important; }
+html.light .text-violet-300  { color: #8a6d24 !important; }
+html.light .text-brand-goldlight { color: #8a6d24 !important; }
+html.light .text-brand-gold      { color: #8a6d24 !important; }
+html.light .text-brand-bluelight { color: #0f4fd6 !important; }
 html.light .text-amber-300   { color: #92400e !important; }
 html.light .text-emerald-200 { color: #065f46 !important; }
 html.light .text-red-200     { color: #991b1b !important; }
@@ -396,22 +439,14 @@ html.light .bg-emerald-400\/10 { background: rgba(16,185,129,.10) !important; }
 html.light .bg-red-400\/10     { background: rgba(239,68,68,.10)  !important; }
 
 /* Ring colors */
-html.light .ring-cyan-300\/70   { --tw-ring-color: rgba(3,105,161,.55) !important; }
-html.light .ring-violet-300\/70 { --tw-ring-color: rgba(91,33,182,.45) !important; }
+html.light .ring-cyan-300\/70   { --tw-ring-color: rgba(30,99,255,.55) !important; }
+html.light .ring-violet-300\/70 { --tw-ring-color: rgba(201,165,75,.60) !important; }
 
 /* Border accent colors */
-html.light .border-cyan-300\/70   { border-color: rgba(3,105,161,.55) !important; }
-html.light .border-violet-300\/70 { border-color: rgba(91,33,182,.45) !important; }
+html.light .border-cyan-300\/70   { border-color: rgba(30,99,255,.55) !important; }
+html.light .border-violet-300\/70 { border-color: rgba(201,165,75,.60) !important; }
 
-/* Buttons — dark bg in light mode for contrast */
-html.light .btn-glow {
-  background: #0f172a !important;
-  color: #f8fafc !important;
-}
-html.light .btn-glow:hover { background: #1e293b !important; }
-/* Override text-slate-950 on btn content */
-html.light .btn-glow .text-slate-950,
-html.light .btn-glow[class*="text-slate-950"] { color: #f8fafc !important; }
+/* Liquid tugma light mode'da ham bir xil — electric blue o'z-o'zidan kontrastli */
 
 /* Secondary link button */
 html.light a[class*="border-white\/15"][class*="text-white"] {
@@ -468,6 +503,33 @@ html.light a[class*="hover\:bg-white\/10"]:hover {
   70%  { transform: scale(1.6); opacity: 0;  }
   100% { transform: scale(1.6); opacity: 0;  }
 }
+
+/* ══════════════════════════════════════════════════
+   MOBIL PERFORMANCE — dekorativ qatlamlar faqat desktopda
+══════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .grain-wrap,
+  .golden-thread,
+  .bg-blob { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════
+   MUAMMO KARTALARI — qizil og'riq / yashil yechim
+══════════════════════════════════════════════════ */
+.prob-pain  { color: #ffe4e6; }                 /* muammo matni: iliq qizg'ish-oq */
+html.light .prob-pain { color: #9f1239; }
+html.light .text-emerald-50  { color: #065f46 !important; }
+html.light .text-emerald-200 { color: #047857 !important; }
+html.light .text-emerald-300 { color: #059669 !important; }
+
+/* ══════════════════════════════════════════════════
+   WIZARD — light CSS-only step transition (no gsap/framer)
+══════════════════════════════════════════════════ */
+@keyframes wizard-step-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.wizard-step-enter { animation: wizard-step-in 0.28s var(--ease-out); }
 
 /* ══════════════════════════════════════════════════
    REDUCED MOTION

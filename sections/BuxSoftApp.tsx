@@ -1,30 +1,52 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Loader2, Send, Sparkles, Star } from "lucide-react";
-import type { Category, CmsData, Service, Stat, Tariff } from "@/types/cms";
-import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { useEffect, useRef, useState } from "react";
+import { ShieldCheck, Sparkles, Star } from "lucide-react";
+import type { CmsData, Stat } from "@/types/cms";
+import { Wizard } from "@/sections/wizard/Wizard";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { cn, money } from "@/lib/utils";
-import { submitLead } from "@/services/cms";
+import { cn, setting } from "@/lib/utils";
 
 declare global {
   interface Window {
-    __bxReady?: boolean;
-    VanillaTilt?: { init: (els: NodeListOf<Element>, opts: object) => void };
     tsParticles?: { load: (id: string, opts: object) => void };
     Swiper?: new (el: Element, opts: object) => { destroy: () => void };
   }
 }
 
-function setting(data: CmsData, key: string, fallback = "") {
-  const v = data.settings[key];
-  return v === undefined || v === null || v === "" ? fallback : String(v);
-}
+/* ── Muammo → yechim kartalari (kontentni shu yerda tahrirlash mumkin) ── */
+const PROBLEMS = [
+  {
+    pain: "Soliq tekshiruvi kelsa, hujjatlarim tayyormi — bilmayman",
+    fix: "Tekshiruvdan oldin to‘liq audit o‘tkazamiz va kamchiliklarni oldindan yopamiz.",
+  },
+  {
+    pain: "Buxgalterim ketib qoldi, hisobotlar to‘xtab qoldi",
+    fix: "Ishni 24 soat ichida qabul qilib olamiz — birorta muddat o‘tib ketmaydi.",
+  },
+  {
+    pain: "EHF, QQS, yangi qonunlar — boshim qotib qoldi",
+    fix: "Qonun o‘zgarishlarini biz kuzatamiz, siz faqat biznesingiz bilan shug‘ullanasiz.",
+  },
+  {
+    pain: "Jarima kelib qoladi, sababini ham bilmayman",
+    fix: "Hisobotlar har oy muddatidan oldin topshiriladi — nazorat to‘liq bizda.",
+  },
+  {
+    pain: "Shtatdagi buxgalter qimmat: oylik, soliqlar, ta’til...",
+    fix: "Autsorsing shtat buxgalterdan sezilarli arzon — faqat xizmat uchun to‘laysiz.",
+  },
+  {
+    pain: "Narxlar shaffof emas, oxirida qo‘shimcha to‘lovlar chiqadi",
+    fix: "Narxni saytda o‘zingiz hisoblaysiz — shartnomadagi narx o‘zgarmaydi.",
+  },
+];
 
-function sortItems<T extends { sort?: number }>(items: T[]) {
-  return [...items].sort((a, b) => Number(a.sort || 0) - Number(b.sort || 0));
-}
+const PROCESS = [
+  { title: "Bepul diagnostika", text: "Qo‘ng‘iroq qilamiz, holatingizni o‘rganamiz va aniq taklif beramiz." },
+  { title: "Og‘riqsiz o‘tish", text: "Hujjatlar va bazani o‘zimiz qabul qilib olamiz — ishingiz bir kun ham to‘xtamaydi." },
+  { title: "Doimiy yurituv", text: "Hisobotlar muddatida topshiriladi, har oy holat bo‘yicha hisobot berib boramiz." },
+];
 
 /* ── Stat counter: raqam yuqoridan tushib, gold chiziq chiqadi ── */
 function StatCounter({ stat }: { stat: Stat }) {
@@ -42,6 +64,15 @@ function StatCounter({ stat }: { stat: Stat }) {
     }
     const el = ref.current;
     if (!el || done.current) return;
+
+    function settle() {
+      if (done.current) return;
+      done.current = true;
+      obs.disconnect();
+      setCount(target);
+      setVisible(true);
+      setSettled(true);
+    }
 
     const obs = new IntersectionObserver(([e]) => {
       if (!e.isIntersecting) return;
@@ -61,7 +92,10 @@ function StatCounter({ stat }: { stat: Stat }) {
     }, { threshold: 0.15 });
 
     obs.observe(el);
-    return () => obs.disconnect();
+    /* IntersectionObserver ishlamasa yoki elementga hech qachon scroll qilinmasa
+       ham raqamlar "0+" bo'lib qolmasligi uchun zaxira taymer. */
+    const fallback = setTimeout(settle, 2000);
+    return () => { obs.disconnect(); clearTimeout(fallback); };
   }, [target]);
 
   return (
@@ -76,67 +110,38 @@ function StatCounter({ stat }: { stat: Stat }) {
 
 /* ══════════════════ MAIN ══════════════════ */
 export function BuxSoftApp({ data }: { data: CmsData }) {
-  const currency   = setting(data, "currency", "so'm");
-  const categories = useMemo(() => sortItems(data.categories), [data.categories]);
-
-  const [categoryId,       setCategoryId]       = useState("");
-  const [tariffId,         setTariffId]         = useState("");
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [form,             setForm]             = useState({ name: "", company: "", phone: "", telegram: "", comment: "" });
-  const [status,           setStatus]           = useState<"idle"|"loading"|"success"|"error">("idle");
-  const [scrolled,         setScrolled]         = useState(false);
-  const [totalPulse,       setTotalPulse]       = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [openProblem, setOpenProblem] = useState<number | null>(null);
 
   const heroTitle    = setting(data, "hero_title", "Soliq tekshiruvlariga oldindan tayyorlaymiz");
   const typedRef     = useRef<HTMLSpanElement>(null);
   const particlesRef = useRef<HTMLDivElement>(null);
 
-  const selectedCategory  = categories.find((c) => c.id === categoryId);
-  const categoryTariffs   = useMemo(() => {
-    if (!selectedCategory?.id) return [];
-    return sortItems(data.tariffs.filter((t) => t.category_id === selectedCategory.id));
-  }, [data.tariffs, selectedCategory?.id]);
-  const selectedTariff    = categoryTariffs.find((t) => t.id === tariffId);
-  const availableServices = useMemo(() => {
-    if (!selectedTariff) return [];
-    return sortItems(data.services.filter((s) => s.tariff_id === selectedTariff.id));
-  }, [data.services, selectedTariff]);
-
-  const extraTotal = availableServices.filter((s) => selectedServices.includes(s.id)).reduce((sum, s) => sum + Number(s.price || 0), 0);
-  const total      = selectedTariff ? Number(selectedTariff.price || 0) + extraTotal : 0;
-
-  /* navbar scroll effect */
+  /* navbar + scroll-progress (fon gradienti scroll bilan jonlanadi) */
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 60);
+    const fn = () => {
+      setScrolled(window.scrollY > 60);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      document.documentElement.style.setProperty(
+        "--bx-scroll",
+        String(max > 0 ? Math.min(window.scrollY / max, 1) : 0)
+      );
+    };
+    fn();
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  /* total pulse */
-  useEffect(() => {
-    setTotalPulse(true);
-    const t = setTimeout(() => setTotalPulse(false), 380);
-    return () => clearTimeout(t);
-  }, [total]);
-
-  /* hero title: oddiy fade-up (preloader tugagandan keyin) */
+  /* hero title: oddiy fade-up */
   useEffect(() => {
     const el = typedRef.current;
     if (!el) return;
     el.textContent = heroTitle;
 
-    async function run() {
+    (async () => {
       const { gsap } = await import("gsap");
       gsap.fromTo(el, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" });
-    }
-
-    if (window.__bxReady) {
-      run();
-    } else {
-      const fallback = setTimeout(run, 2200);
-      window.addEventListener("bx:ready", run, { once: true });
-      return () => { window.removeEventListener("bx:ready", run); clearTimeout(fallback); };
-    }
+    })();
   }, [heroTitle]);
 
   /* GSAP scroll reveals */
@@ -179,13 +184,14 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
     let cancel = false;
     function tryLoad() {
       if (cancel || !particlesRef.current) return;
+      /* Faqat desktopda — mobilda ortiqcha animatsiyalarni kamaytirish uchun */
+      if (window.innerWidth < 768) return;
       if (!window.tsParticles) { setTimeout(tryLoad, 200); return; }
       particlesRef.current.id = "tsparticles-hero";
-      const mob = window.innerWidth < 640;
       window.tsParticles.load("tsparticles-hero", {
         particles: {
-          number: { value: mob ? 8 : 18, density: { enable: true } },
-          color:  { value: ["#ffffff", "#a78bfa", "#22d3ee"] },
+          number: { value: 18, density: { enable: true } },
+          color:  { value: ["#ffffff", "#5B8CFF", "#C9A54B"] },
           opacity: { value: 0.12, random: true },
           size:   { value: { min: 1, max: 3 }, random: true },
           move:   { enable: true, speed: 0.4, direction: "none", random: true, outModes: "bounce" },
@@ -193,33 +199,12 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
         },
         interactivity: { events: { onHover: { enable: false }, onClick: { enable: false } } },
         detectRetina: false,
-        fpsLimit: mob ? 15 : 25,
+        fpsLimit: 25,
       });
     }
     tryLoad();
     return () => { cancel = true; };
   }, []);
-
-  /* VanillaTilt ±4° */
-  useEffect(() => {
-    if (typeof window === "undefined" || window.innerWidth < 768) return;
-    let els: Element[] = [];
-    function tryTilt() {
-      if (!window.VanillaTilt) { setTimeout(tryTilt, 200); return; }
-      const cards = document.querySelectorAll(".tilt-card");
-      if (cards.length) {
-        window.VanillaTilt.init(cards, { max: 4, speed: 500, glare: true, "max-glare": 0.1 });
-        els = Array.from(cards);
-      }
-    }
-    tryTilt();
-    return () => {
-      els.forEach((el) => {
-        const e = el as unknown as { vanillaTilt?: { destroy: () => void } };
-        e.vanillaTilt?.destroy();
-      });
-    };
-  }, [categories]);
 
   /* Swiper */
   useEffect(() => {
@@ -241,41 +226,6 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
     return () => { swiper?.destroy(); };
   }, [data.testimonials.length]);
 
-  /* nav helpers */
-  function chooseCategory(c: Category) {
-    setCategoryId(c.id); setTariffId(""); setSelectedServices([]);
-    setTimeout(() => document.getElementById("tariffs")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-  }
-  function chooseTariff(t: Tariff) {
-    setTariffId(t.id); setSelectedServices([]);
-    setTimeout(() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-  }
-  function goBack() {
-    setCategoryId(""); setTariffId(""); setSelectedServices([]);
-    setTimeout(() => document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-  }
-  function toggleService(s: Service) {
-    setSelectedServices((cur) => cur.includes(s.id) ? cur.filter((id) => id !== s.id) : [...cur, s.id]);
-  }
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!selectedCategory || !selectedTariff) return;
-    setStatus("loading");
-    try {
-      await submitLead({
-        ...form,
-        industry: selectedCategory.name,
-        tariff:   selectedTariff.name,
-        services: availableServices.filter((s) => selectedServices.includes(s.id)).map((s) => s.name),
-        total,
-      });
-      setStatus("success");
-      setForm({ name: "", company: "", phone: "", telegram: "", comment: "" });
-      setSelectedServices([]);
-    } catch { setStatus("error"); }
-  }
-
   /* ══════════════════ RENDER ══════════════════ */
   return (
     <main className="bg-premium min-h-screen overflow-hidden">
@@ -296,7 +246,7 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <a href="#calculator" className="btn-glow rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-cyan-100 sm:text-sm">
+              <a href="#wizard" className="btn-glow rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-950 transition hover:bg-cyan-100 sm:text-sm">
                 {setting(data, "sticky_cta_text", "Hisob-kitob")}
               </a>
             </div>
@@ -304,7 +254,7 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
 
           <div className="grid items-center gap-10 lg:grid-cols-[1.08fr_.92fr]">
             <div>
-              <div data-reveal="up" className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-cyan-100">
+              <div data-reveal="up" className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-gold/30 bg-white/5 px-4 py-2 text-sm text-brand-goldlight">
                 <Sparkles size={16} />
                 {setting(data, "hero_badge", "Google Sheets CMS")}
               </div>
@@ -316,10 +266,10 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
                 {setting(data, "hero_subtitle", "Faoliyat turini tanlang, tarif va xizmatlarni ko'ring.")}
               </p>
               <div data-reveal="up" data-reveal-delay="180" className="mt-8 flex flex-wrap gap-3">
-                <a href="#calculator" className="btn-glow rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-100">
+                <a href="#wizard" className="btn-glow rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-100">
                   {setting(data, "cta_text", "Bepul konsultatsiya olish")}
                 </a>
-                <a href="#tariffs" className="rounded-full border border-white/15 px-5 py-3 text-sm font-bold text-white/90 transition hover:bg-white/10">
+                <a href="#wizard" className="rounded-full border border-white/15 px-5 py-3 text-sm font-bold text-white/90 transition hover:bg-white/10">
                   {setting(data, "secondary_cta_text", "Tariflarni ko'rish")}
                 </a>
               </div>
@@ -328,14 +278,7 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
             <div data-reveal="left" data-reveal-delay="80" className="glass relative rounded-[2rem] p-5 shadow-glow sm:p-6">
               <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-indigo-500/40 blur-3xl" />
               <div className="relative rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-5 sm:p-6">
-                <p className="text-sm text-slate-400">Live quote</p>
-                <div className="mt-3 text-3xl font-black sm:text-4xl">
-                  {selectedTariff ? (
-                    <><AnimatedNumber value={total} /> <span className="text-lg text-slate-400">{currency}</span></>
-                  ) : (
-                    <span>Tarifni tanlang</span>
-                  )}
-                </div>
+                <p className="text-sm text-slate-400">BuxSoft raqamlarda</p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {data.stats.slice(0, 4).map((stat) => (
                     <div key={stat.id} className="rounded-2xl bg-white/5 p-4">
@@ -350,141 +293,117 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
         </div>
       </section>
 
-      {/* CATEGORIES */}
-      <section id="calculator" className="relative mx-auto max-w-7xl scroll-mt-8 px-4 py-12 sm:px-6 lg:px-8">
-        <div data-reveal="right">
-          <p className="text-sm font-bold uppercase tracking-[.28em] text-cyan-300">CMS calculator</p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Faoliyat turini tanlang</h2>
+      {/* MUAMMO → YECHIM */}
+      <section id="problems" className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div data-reveal="up">
+          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">Muammo → yechim</p>
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Tanish muammolarmi?</h2>
+          <p className="mt-3 max-w-2xl text-slate-300">
+            Har kuni tadbirkorlardan eshitadigan og‘riqlar — birini oching, yechimini ko‘ring.
+          </p>
         </div>
-        <div data-reveal-group className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map((category) => (
-            <button
-              type="button"
-              key={category.id}
-              data-reveal-child
-              onClick={() => chooseCategory(category)}
-              className={cn(
-                "tilt-card glass rounded-3xl p-5 text-left transition duration-200 hover:-translate-y-1 hover:bg-white/10",
-                selectedCategory?.id === category.id && "border-cyan-300/70 ring-2 ring-cyan-300/70"
-              )}
-            >
-              <div className="text-3xl">{category.emoji}</div>
-              <h3 className="mt-4 text-lg font-black">{category.name}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-300">{category.description}</p>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* TARIFFS */}
-      <section id="tariffs" className="relative mx-auto max-w-7xl scroll-mt-8 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div data-reveal="right">
-            <p className="text-sm font-bold uppercase tracking-[.28em] text-violet-300">Dynamic pricing</p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Dinamik tariflar</h2>
-          </div>
-          {selectedCategory && (
-            <div data-reveal="left" className="flex flex-wrap items-center gap-3">
-              <span className="text-sm text-slate-400">Tanlangan: <b className="text-white">{selectedCategory.name}</b></span>
-              <button type="button" onClick={goBack} className="rounded-full border border-white/15 px-4 py-2 text-sm font-bold text-white/90 transition hover:bg-white/10">
-                ← Orqaga
-              </button>
-            </div>
-          )}
-        </div>
-
-        {!selectedCategory ? (
-          <div data-reveal="up" className="mt-8 glass rounded-[2rem] p-8 text-center">
-            <div className="mx-auto max-w-2xl">
-              <h3 className="text-2xl font-black">Avval faoliyatingizni tanlang</h3>
-              <p className="mt-3 text-slate-300">Tariflarni ko'rish uchun yuqoridagi bo'limdan yo'nalishingizni tanlang.</p>
-              <a href="#calculator" className="btn-glow mt-6 inline-flex rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-100">
-                Faoliyatni tanlash
-              </a>
-            </div>
-          </div>
-        ) : (
-          <div data-reveal-group className="mt-8 grid gap-5 lg:grid-cols-3">
-            {categoryTariffs.length ? categoryTariffs.map((tariff) => (
-              <button
-                type="button"
-                key={tariff.id}
+        <div data-reveal-group className="mt-8 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {PROBLEMS.map((p, i) => {
+            const open = openProblem === i;
+            return (
+              <div
+                key={p.pain}
                 data-reveal-child
-                onClick={() => chooseTariff(tariff)}
                 className={cn(
-                  "glass relative rounded-[2rem] p-6 text-left transition duration-200 hover:-translate-y-1 hover:bg-white/10",
-                  selectedTariff?.id === tariff.id && "border-violet-300/70 ring-2 ring-violet-300/70"
+                  "glass relative flex flex-col overflow-hidden rounded-3xl p-6 pl-7 transition duration-200",
+                  open
+                    ? "border-emerald-400/50 ring-1 ring-emerald-400/40"
+                    : "prob-card hover:-translate-y-1 hover:bg-white/10"
                 )}
               >
-                {tariff.badge && (
-                  <div className="absolute right-5 top-5 rounded-full bg-white px-3 py-1 text-xs font-black text-slate-950">{tariff.badge}</div>
+                {/* chap chiziq — yopiqda qizil (og'riq), ochiqda yashil (yechim) */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute inset-y-6 left-0 w-1 rounded-r-full bg-gradient-to-b transition-colors",
+                    open ? "from-emerald-400 via-emerald-400/70 to-emerald-400/10" : "from-rose-500 via-rose-500/70 to-rose-500/10"
+                  )}
+                />
+                <h3 className="prob-pain relative flex-1 text-xl font-black leading-snug sm:text-[22px]">
+                  {p.pain}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setOpenProblem(open ? null : i)}
+                  className={cn(
+                    "mt-5 inline-flex min-h-[44px] w-fit items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition",
+                    open
+                      ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/20"
+                      : "border-brand-blue/40 bg-brand-blue/10 text-brand-bluelight hover:bg-brand-blue/20 hover:text-white"
+                  )}
+                >
+                  {open ? "Yopish ↑" : "Yechimni ko‘rish ↓"}
+                </button>
+                {open && (
+                  <div className="wizard-step-enter mt-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 p-4">
+                    <div className="flex gap-3">
+                      <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" strokeWidth={2} />
+                      <p className="text-sm leading-6 text-emerald-50">{p.fix}</p>
+                    </div>
+                    <a
+                      href="#wizard"
+                      className="btn-glow ml-8 mt-3 inline-flex min-h-[40px] items-center rounded-full px-4 py-2 text-xs font-black"
+                    >
+                      Narxni hisoblash →
+                    </a>
+                  </div>
                 )}
-                <div className={cn("mb-6 h-2 w-24 rounded-full bg-gradient-to-r", tariff.gradient || "from-cyan-400 to-violet-500")} />
-                <h3 className="text-2xl font-black">{tariff.name}</h3>
-                <p className="mt-3 min-h-12 text-sm leading-6 text-slate-300">{tariff.description}</p>
-                <div className="mt-5 text-3xl font-black">{money(tariff.price, currency)}</div>
-                {tariff.old_price ? <div className="mt-1 text-sm text-slate-500 line-through">{money(tariff.old_price, currency)}</div> : null}
-                <ul className="mt-6 space-y-3">
-                  {tariff.features.map((f) => (
-                    <li key={f} className="flex gap-2 text-sm text-slate-200">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </button>
-            )) : (
-              <div className="glass rounded-[2rem] p-6 text-slate-300 lg:col-span-3">Bu faoliyat turi uchun tariflar hali kiritilmagan.</div>
-            )}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
       </section>
 
-      {/* SERVICES + FORM */}
-      <section id="services" className="relative mx-auto grid max-w-7xl scroll-mt-8 gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_420px] lg:px-8">
-        <div data-reveal="right" className="glass rounded-[2rem] p-6">
-          <h2 className="text-3xl font-black">Qo'shimcha xizmatlar</h2>
-          <p className="mt-2 text-sm text-slate-400">Xizmat tanlang — narx avtomatik yangilanadi.</p>
-          <div className="mt-6 grid gap-3">
-            {availableServices.length ? availableServices.map((s) => (
-              <label key={s.id} className="flex cursor-pointer items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:bg-white/10">
-                <input type="checkbox" checked={selectedServices.includes(s.id)} onChange={() => toggleService(s)} className="mt-1 h-5 w-5 accent-cyan-300" />
-                <div className="flex-1">
-                  <div className="font-bold">{s.name}</div>
-                  <div className="mt-1 text-sm text-slate-400">{s.description}</div>
-                </div>
-                <b className="text-sm sm:text-base">{money(s.price, currency)}</b>
-              </label>
-            )) : (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-slate-300">Bu tarif uchun qo'shimcha xizmatlar hali kiritilmagan.</div>
-            )}
-          </div>
+      {/* QANDAY ISHLAYMIZ + KAFOLAT */}
+      <section className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div data-reveal="up">
+          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">3 qadam</p>
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Qanday ishlaymiz?</h2>
+        </div>
+        <div data-reveal-group className="mt-8 grid gap-4 sm:grid-cols-3">
+          {PROCESS.map((s, i) => (
+            <div key={s.title} data-reveal-child className="glass rounded-3xl p-6">
+              <div className="text-4xl font-black text-white/15">0{i + 1}</div>
+              <h3 className="mt-3 text-lg font-black">{s.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{s.text}</p>
+            </div>
+          ))}
         </div>
 
-        <form data-reveal="left" onSubmit={onSubmit} className="glass rounded-[2rem] p-6">
-          <h2 className="text-3xl font-black">So'rov yuborish</h2>
-          <div className={`mt-5 rounded-2xl bg-white/5 p-4 ${totalPulse ? "price-pulse" : ""}`}>
-            <span className="text-sm text-slate-400">Jami taxminiy narx</span>
-            <div className="mt-1 text-3xl font-black"><AnimatedNumber value={total} /> <span className="text-lg text-slate-400">{currency}</span></div>
+        <div
+          data-reveal="up"
+          className="glass mt-8 flex flex-col items-start justify-between gap-5 rounded-[2rem] border-emerald-300/30 p-6 sm:flex-row sm:items-center sm:p-8"
+        >
+          <div className="flex items-start gap-4">
+            <div className="text-4xl">🛡️</div>
+            <div>
+              <h3 className="text-xl font-black sm:text-2xl">
+                Bizning aybimiz bilan jarima chiqsa — zararni o‘zimiz qoplaymiz
+              </h3>
+              <p className="mt-2 text-slate-300">Bu og‘zaki va’da emas — shartnomada yozib beriladi.</p>
+            </div>
           </div>
-          <div className="mt-5 space-y-3">
-            <input className="input" required placeholder="Ismingiz"  value={form.name}     onChange={(e) => setForm({ ...form, name:     e.target.value })} />
-            <input className="input"          placeholder="Kompaniya" value={form.company}  onChange={(e) => setForm({ ...form, company:  e.target.value })} />
-            <input className="input"          placeholder="Telefon"   value={form.phone}    onChange={(e) => setForm({ ...form, phone:    e.target.value })} />
-            <input className="input"          placeholder="Telegram"  value={form.telegram} onChange={(e) => setForm({ ...form, telegram: e.target.value })} />
-            <textarea className="input min-h-28" placeholder="Izoh"  value={form.comment}  onChange={(e) => setForm({ ...form, comment:  e.target.value })} />
-          </div>
-          <button
-            type="submit"
-            disabled={status === "loading" || !selectedCategory || !selectedTariff || (!form.phone && !form.telegram)}
-            className="btn-glow mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-50"
+          <a
+            href="#wizard"
+            className="btn-glow shrink-0 rounded-full bg-white px-6 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-100"
           >
-            {status === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send size={16} />}
-            {status === "loading" ? "Yuborilmoqda..." : setting(data, "cta_text", "Yuborish")}
-          </button>
-          {status === "success" && <div className="mt-4 rounded-2xl bg-emerald-400/10 p-4 text-sm text-emerald-200">{setting(data, "lead_success_title", "Qabul qilindi")}. {setting(data, "lead_success_text", "Tez orada bog'lanamiz.")}</div>}
-          {status === "error"   && <div className="mt-4 rounded-2xl bg-red-400/10    p-4 text-sm text-red-200">Xatolik yuz berdi. Telefon yoki Telegramni tekshirib qayta urinib ko'ring.</div>}
-        </form>
+            Bepul konsultatsiya
+          </a>
+        </div>
+      </section>
+
+      {/* WIZARD */}
+      <section id="wizard" className="relative mx-auto max-w-4xl scroll-mt-8 px-4 py-12 sm:px-6 lg:px-8">
+        <div data-reveal="up" className="mb-8 text-center">
+          <p className="text-sm font-bold uppercase tracking-[.28em] text-brand-goldlight">Bir daqiqada</p>
+          <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">Bepul konsultatsiya oling</h2>
+        </div>
+        <Wizard data={data} />
       </section>
 
       {/* TESTIMONIALS */}

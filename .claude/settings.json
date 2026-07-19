@@ -2,7 +2,33 @@
   "permissions": {
     "allow": [
       "Bash(npx next *)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3010)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3010)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(npm run *)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(node -e ' *)",
+      "Bash(npm list *)",
+      "Bash(npx playwright *)",
+      "Bash(node -e \"require\\('@playwright/test'\\)\")",
+      "Bash(ls /c/Users/user/AppData/Roaming/npm/node_modules/ 2>/dev/null | head -20)",
+      "Read(//c/Users/user/AppData/Roaming/npm/**)",
+      "PowerShell(npm root -g)",
+      "PowerShell(npm install -g playwright 2>&1)",
+      "PowerShell(node \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\tg_test.mjs\" 2>&1)",
+      "PowerShell(node \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\tg_test.cjs\" 2>&1)",
+      "PowerShell(node \"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\tg_zoom.cjs\" 2>&1)",
+      "Bash(netlify --version)",
+      "Bash(curl -s https://buxsoft.uz)",
+      "PowerShell(npm install -g netlify-cli 2>&1)",
+      "PowerShell(netlify status 2>&1)",
+      "PowerShell(netlify login 2>&1)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\user\\AppData\\Local\\Temp"
     ]
   }
 }

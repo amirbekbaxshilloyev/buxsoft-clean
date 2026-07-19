@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
-import { Preloader }            from "@/components/Preloader";
 import { GrainOverlay }         from "@/components/GrainOverlay";
 import { GoldenThread }         from "@/components/GoldenThread";
 import { TelegramFloat }        from "@/components/TelegramFloat";
@@ -30,7 +29,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <SmoothScrollProvider>
-          <Preloader />
           <GrainOverlay />
           <GoldenThread />
           {/* Subtle animated background blobs — CSS only, no WebGL */}
@@ -40,7 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </SmoothScrollProvider>
         <TelegramFloat />
 
-        <Script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/lib/vanilla-tilt.min.js" strategy="afterInteractive" />
         <Script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js" strategy="lazyOnload" />
         <Script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" strategy="afterInteractive" />
       </body>

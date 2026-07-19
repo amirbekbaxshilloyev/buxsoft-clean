@@ -11,8 +11,18 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        brand: {
+          navy: "#0B1F4D",
+          navydeep: "#060F26",
+          blue: "#1E63FF",
+          bluelight: "#5B8CFF",
+          gold: "#C9A54B",
+          goldlight: "#E3C87E"
+        }
+      },
       boxShadow: {
-        glow: "0 0 80px rgba(79,70,229,.28)"
+        glow: "0 0 80px rgba(30,99,255,.28)"
       }
     }
   },
