@@ -268,7 +268,13 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
             {setting(data, "problems_subtitle", "Har kuni tadbirkorlardan eshitadigan og‘riqlar — birini oching, yechimini ko‘ring.")}
           </p>
         </div>
-        <div data-reveal-group className="mt-8 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          data-reveal-group
+          className={cn(
+            "mt-8 grid items-start gap-4",
+            data.problems.length === 4 ? "sm:grid-cols-2 lg:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"
+          )}
+        >
           {data.problems.map((p, i) => {
             const open = openProblem === i;
             return (
