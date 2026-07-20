@@ -5,7 +5,7 @@ import { Loader2, Send } from "lucide-react";
 import type { CmsData } from "@/types/cms";
 import type { WizardFormData } from "@/types/wizard";
 import { formatPhoneDisplay, getUtmMarker, isPhoneValid, phoneDigitsOnly, toE164, withStepMarker } from "@/lib/wizard";
-import { setting } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 import { submitLead } from "@/services/cms";
 
 type Props = {
@@ -18,11 +18,12 @@ type Props = {
 };
 
 export function StepRegistration({ data, form, update, leadStarted, markLeadStarted, onNext }: Props) {
+  const { t, s } = useI18n();
   const [nameTouched, setNameTouched] = useState(false);
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const telegramUrl = setting(data, "telegram_url", "https://t.me/BuxSoftuz");
+  const telegramUrl = s(data, "telegram_url", "https://t.me/BuxSoftuz");
   const nameValid = form.name.trim().length >= 2;
   const phoneValid = isPhoneValid(form.phoneDigits);
 
@@ -66,20 +67,20 @@ export function StepRegistration({ data, form, update, leadStarted, markLeadStar
 
   return (
     <div>
-      <h2 className="text-xl font-black sm:text-2xl">Keling, tanishamiz</h2>
-      <p className="mt-1 text-sm text-slate-400">Ism va telefon raqamingizni qoldiring — mutaxassisimiz siz bilan bog‘lanadi.</p>
+      <h2 className="text-xl font-black sm:text-2xl">{t("reg_title")}</h2>
+      <p className="mt-1 text-sm text-slate-400">{t("reg_sub")}</p>
 
       <div className="mt-5 space-y-4">
         <div>
           <input
             className="input"
-            placeholder="Ismingiz"
+            placeholder={t("name_ph")}
             value={form.name}
             onChange={(e) => update({ name: e.target.value })}
             onBlur={() => setNameTouched(true)}
           />
           {nameTouched && !nameValid && (
-            <p className="mt-1.5 text-xs text-red-300">Ism kamida 2 ta belgidan iborat bo‘lishi kerak.</p>
+            <p className="mt-1.5 text-xs text-red-300">{t("name_err")}</p>
           )}
         </div>
         <div>
@@ -93,7 +94,7 @@ export function StepRegistration({ data, form, update, leadStarted, markLeadStar
             onBlur={() => setPhoneTouched(true)}
           />
           {phoneTouched && !phoneValid && (
-            <p className="mt-1.5 text-xs text-red-300">To‘liq telefon raqamini kiriting (masalan: 90 123 45 67).</p>
+            <p className="mt-1.5 text-xs text-red-300">{t("phone_err")}</p>
           )}
         </div>
       </div>
@@ -104,7 +105,7 @@ export function StepRegistration({ data, form, update, leadStarted, markLeadStar
         rel="noopener noreferrer"
         className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-sm font-bold text-brand-bluelight transition hover:text-white"
       >
-        Telegram orqali davom etish →
+        {t("tg_continue")}
       </a>
 
       <button
@@ -114,7 +115,7 @@ export function StepRegistration({ data, form, update, leadStarted, markLeadStar
         className="btn-glow mt-6 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3.5 text-sm font-black text-slate-950 transition hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send size={16} />}
-        {submitting ? "Yuborilmoqda..." : "Davom etish"}
+        {submitting ? t("sending") : t("continue")}
       </button>
     </div>
   );

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CmsData } from "@/types/cms";
 import type { WizardFormData, WizardStep } from "@/types/wizard";
 import { captureUtm, clearWizardState, deriveSelection, loadWizardState, saveWizardState } from "@/lib/wizard";
+import { useI18n } from "@/lib/i18n";
 import { StepRegistration } from "./StepRegistration";
 import { StepActivity } from "./StepActivity";
 import { StepTariff } from "./StepTariff";
@@ -21,15 +22,8 @@ const EMPTY_FORM: WizardFormData = {
   tgSubscribed: false,
 };
 
-const STEP_LABELS: Record<WizardStep, string> = {
-  1: "Kontakt",
-  2: "Faoliyat",
-  3: "Tarif",
-  4: "Xizmatlar",
-  5: "Tasdiqlash",
-};
-
 export function Wizard({ data }: { data: CmsData }) {
+  const { t } = useI18n();
   const [step, setStep] = useState<WizardStep>(1);
   const [form, setForm] = useState<WizardFormData>(EMPTY_FORM);
   const [leadStarted, setLeadStarted] = useState(false);
@@ -86,7 +80,7 @@ export function Wizard({ data }: { data: CmsData }) {
         <div className="mb-6">
           <div className="flex min-h-[44px] items-center justify-between gap-3">
             <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              {step}/5 — {STEP_LABELS[step]}
+              {step}/5 — {t(`step_${step}`)}
             </span>
             {step > 1 && (
               <button
@@ -94,7 +88,7 @@ export function Wizard({ data }: { data: CmsData }) {
                 onClick={goBack}
                 className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-5 py-2 text-sm font-black text-white transition hover:bg-white/15"
               >
-                ← Orqaga
+                {t("back")}
               </button>
             )}
           </div>

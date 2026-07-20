@@ -11,9 +11,9 @@ export function setting(data: CmsData, key: string, fallback = ""): string {
   return v === undefined || v === null || v === "" ? fallback : String(v);
 }
 
-export function money(value: number | string | undefined, currency = "so‘m") {
+export function money(value: number | string | undefined, currency = "so‘m", lang: "uz" | "ru" = "uz") {
   const n = Number(value || 0);
-  if (!n) return "Individual";
+  if (!n) return lang === "ru" ? "Индивидуально" : "Individual";
   return `${new Intl.NumberFormat("uz-UZ").format(n)} ${currency}`;
 }
 
