@@ -83,6 +83,19 @@ Foydalanuvchi ketma-ketligi: 1) fon ✅ → 2) shriftlar 🔶 → 3) joylashuv �
 ### 8. Rang tuzatishi — `text-white/15` xaritalandi (`globals.css`)
 Process raqamlari (`01/02/03`, klass `text-white/15`) token-xaritada yo'q edi → yorug' kartada oq-ustiga-oq, ko'rinmas. `.text-white\/5..\/20` → dark'da `rgba(242,239,233,.16)` (nozik krem), light'da `rgba(201,165,75,.38)` (nozik oltin suv belgisi). To'liq WCAG sweep o'tkazildi — qolgan "fail"lar soxta-musbat (gradient CTA tugmalari = oq matn ko'k ustida; foto-fonli header). Overlap tekshiruvi (desktop/tablet/mobil) — listlar/gridlar toza, gorizontal overflow yo'q.
 
+### 9. PERFORMANS — "sekin/qotib qolish" tuzatildi (2026-07-20)
+**Simptom:** sayt sekin ishlagan, scroll'da qotib qolgan. Skrinshot vositasi ham shu sabab timeout beradi.
+**O'lchov (`preview_eval`):** uskuna aybdor emas (8 yadro, DPR 1, atigi 279 DOM). Aybdor — vizual effektlar yuki:
+- `grain-wrap`: `grain-drift 0.26s` CHEKSIZ + SVG `filter:url(#bx-grain)` (feTurbulence) → butun ekran sekundiga ~4 marta qayta chizilardi.
+- **17 ta** element `backdrop-filter: blur(14–24px)` (glass kartalar) → Lenis smooth-scroll bilan har kadrda hammasi qayta blur.
+- `hero-gradient-overlay`: animated `background-position` + `mix-blend-mode:screen` (opacity 0.05 da ko'rinmasdi ham).
+**Yechim (`globals.css`):**
+- Grain → **STATIK** (animatsiya olib tashlandi; ko'rinish deyarli bir xil).
+- `.glass`/`.glass-liquid` dan `backdrop-filter` **olib tashlandi**; o'rniga opaque `--c-card` asos (dark `#1D1F29`, light `#FFFFFF`). Yorug'da ko'rinishga ta'sir yo'q (allaqachon opaque oq); qorong'ida kartalar endi `#1D1F29` opaque, krem matn o'qiladi. Faqat **header**da backdrop-blur qoldi (1 ta element).
+- `btn-glow` backdrop-filter olib tashlandi (foni ko'k gradient — blur ko'rinmasdi).
+- `hero-gradient-overlay` animatsiyasi statik qilindi.
+**Natija:** `backdrop-filter` 17→1, cheksiz full-screen animatsiyalar yo'q. `PerformanceObserver`: **longTasks=0** (main-thread bloklanmaydi). *Eslatma: headless preview RAF'ni sekinlashtiradi, shuning uchun bu muhitdagi FPS raqami haqiqiy qurilmani aks ettirmaydi — ishonchli signal long-task yo'qligi.* `hero-kenburns` (24s transform-only, GPU) va bloblar (composited) qoldirildi — arzon.
+
 ## Ochiq qolgan ishlar (kelishilgan, hali qilinmagan)
 1. **`TARIFFS.features_ru` to'ldirish** (Sheet) — yuqorida.
 2. **Til: yangi kontent qo'shilsa `_ru`ni ham to'ldirish** (foydalanuvchi zimmasida).
