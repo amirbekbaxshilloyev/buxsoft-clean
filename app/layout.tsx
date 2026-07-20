@@ -42,6 +42,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Apply theme before paint — prevents flash */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* CDN ulanishini oldindan ochish — tsParticles/Swiper tezroq yuklanadi */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
       </head>
       <body>

@@ -156,7 +156,13 @@ export async function getCmsData(): Promise<CmsData> {
   if (!API_URL) return normalizeCmsData(fallbackData);
 
   try {
-    const res = await fetch(API_URL, { cache: "no-store" });
+    /* ISR keshlash: Apps Script har zaprosда emas, `revalidate` oralig'ida bir marta.
+       AbortSignal.timeout: Apps Script osilib qolsa (odatda 4–6s javob beradi) 9s dan keyin
+       to'xtatamiz va zaxira kontentga o'tamiz — sahifa hech qachon cheksiz kutib qolmaydi. */
+    const res = await fetch(API_URL, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(9000),
+    });
     if (!res.ok) return normalizeCmsData(fallbackData);
     const json = await res.json();
     if (!json.success) return normalizeCmsData(fallbackData);
