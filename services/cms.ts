@@ -68,6 +68,27 @@ const fallbackData: CmsData = {
   process: DEFAULT_PROCESS
 };
 
+/* Sheet ustun sarlavhalarida ba'zan asosiy (o'zbekcha) ustunga " (UZ)" qo'shib qo'yiladi —
+   RU tarjima ustunlaridan (`_ru`) ajratish uchun. Kod esa maydonlarni suffikssiz o'qiydi
+   (masalan `title`, `pain`, `name`), shuning uchun har qatorda "field (UZ)" → "field" ga
+   normallashtiramiz. Shu tufayli Sheet sarlavhalari qanday bo'lishidan qat'i nazar UZ rejimi ishlaydi. */
+const UZ_SUFFIX = /\s*\(\s*uz\s*\)\s*$/i;
+function stripUzSuffix<T extends Record<string, unknown>>(row: T): T {
+  let changed = false;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(row)) {
+    const base = key.replace(UZ_SUFFIX, "");
+    if (base !== key) changed = true;
+    /* asosiy kalit hali bo'sh bo'lsa suffiksli ustun qiymatini yozamiz — mavjud toza qiymatni ustidan yozmaymiz */
+    if (out[base] === undefined || out[base] === null || out[base] === "") out[base] = value;
+  }
+  return (changed ? out : row) as T;
+}
+
+function normalizeRows<T>(rows: unknown): T[] {
+  return Array.isArray(rows) ? rows.map((r) => stripUzSuffix((r ?? {}) as Record<string, unknown>) as T) : [];
+}
+
 function isActive(item: { active?: boolean }) {
   return item.active !== false;
 }
@@ -90,30 +111,42 @@ function sortBySort<T extends { sort?: number }>(items: T[]): T[] {
 
 export function normalizeCmsData(raw: Partial<CmsData> | undefined | null): CmsData {
   const data = raw || fallbackData;
-  const settings = { ...fallbackData.settings, ...(data.settings || {}) };
+  /* "field (UZ)" → "field" — sozlama kalitlari uchun ham (garchi SETTINGS odatda toza bo'lsa-da) */
+  const settings = { ...fallbackData.settings, ...(stripUzSuffix((data.settings || {}) as Record<string, unknown>) as CmsData["settings"]) };
 
-  const categories = sortBySort((Array.isArray(data.categories) ? data.categories : fallbackData.categories).filter(isActive));
-  const tariffs = sortBySort((Array.isArray(data.tariffs) ? data.tariffs : fallbackData.tariffs).filter(isActive).map((tariff): Tariff => ({
+  const srcCategories = data.categories ? normalizeRows<CmsData["categories"][number]>(data.categories) : fallbackData.categories;
+  const categories = sortBySort(srcCategories.filter(isActive));
+
+  const srcTariffs = data.tariffs ? normalizeRows<Tariff>(data.tariffs) : fallbackData.tariffs;
+  const tariffs = sortBySort(srcTariffs.filter(isActive).map((tariff): Tariff => ({
     ...tariff,
     price: toNumber(tariff.price),
     old_price: tariff.old_price ? toNumber(tariff.old_price) : "",
     features: splitFeatures((tariff as unknown as { features: unknown }).features)
   })));
-  const services = sortBySort((Array.isArray(data.services) ? data.services : fallbackData.services).filter(isActive).map((service) => ({
+
+  const srcServices = data.services ? normalizeRows<CmsData["services"][number]>(data.services) : fallbackData.services;
+  const services = sortBySort(srcServices.filter(isActive).map((service) => ({
     ...service,
     price: toNumber(service.price)
   })));
-  const testimonials = sortBySort((Array.isArray(data.testimonials) ? data.testimonials : fallbackData.testimonials).filter(isActive).map((item) => ({
+
+  const srcTestimonials = data.testimonials ? normalizeRows<CmsData["testimonials"][number]>(data.testimonials) : fallbackData.testimonials;
+  const testimonials = sortBySort(srcTestimonials.filter(isActive).map((item) => ({
     ...item,
     rating: Number(item.rating || 5)
   })));
-  const faq = sortBySort((Array.isArray(data.faq) ? data.faq : fallbackData.faq).filter(isActive));
-  const stats = sortBySort((Array.isArray(data.stats) ? data.stats : fallbackData.stats).filter(isActive));
+
+  const srcFaq = data.faq ? normalizeRows<CmsData["faq"][number]>(data.faq) : fallbackData.faq;
+  const faq = sortBySort(srcFaq.filter(isActive));
+
+  const srcStats = data.stats ? normalizeRows<CmsData["stats"][number]>(data.stats) : fallbackData.stats;
+  const stats = sortBySort(srcStats.filter(isActive));
 
   /* PROBLEMS/PROCESS sheeti bo'sh yoki hali yaratilmagan bo'lsa — zaxira kontent */
-  const rawProblems = (Array.isArray(data.problems) ? data.problems : []).filter(isActive);
+  const rawProblems = normalizeRows<Problem>(data.problems).filter(isActive);
   const problems = rawProblems.length ? sortBySort(rawProblems) : DEFAULT_PROBLEMS;
-  const rawProcess = (Array.isArray(data.process) ? data.process : []).filter(isActive);
+  const rawProcess = normalizeRows<ProcessStep>(data.process).filter(isActive);
   const process = rawProcess.length ? sortBySort(rawProcess) : DEFAULT_PROCESS;
 
   return { settings, categories, tariffs, services, testimonials, faq, stats, problems, process };
