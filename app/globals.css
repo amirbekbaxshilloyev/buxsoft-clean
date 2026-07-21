@@ -37,7 +37,7 @@
   --c-surf2:   rgba(242,239,233,.09);
   --c-surf3:   rgba(242,239,233,.13);
   --c-panel:   rgba(9,10,15,.55);        /* to'q ichki panel */
-  --c-nav:     rgba(20,21,29,.80);
+  --c-nav:     rgba(20,21,29,.95);        /* header foni — deyarli opaque (backdrop-blur o'rniga, scroll tez) */
   --c-card:    #1D1F29;                   /* glass kartalar uchun opaque asos (backdrop-blur o'rniga) */
 
   --c-glass:   linear-gradient(135deg, rgba(242,239,233,.06), rgba(242,239,233,.02));
@@ -73,7 +73,7 @@ html.light {
   --c-surf2:   rgba(26,26,26,.055);
   --c-surf3:   rgba(26,26,26,.085);
   --c-panel:   #FFFFFF;
-  --c-nav:     rgba(250,248,244,.85);
+  --c-nav:     rgba(250,248,244,.96);     /* header foni — deyarli opaque (backdrop-blur o'rniga) */
   --c-card:    #FFFFFF;                   /* yorug' rejimda oq karta */
 
   --c-glass:   linear-gradient(135deg, #FFFFFF, #FFFFFF);
@@ -154,7 +154,7 @@ html.light .bg-premium {
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
-  filter: blur(90px);
+  filter: blur(64px);            /* 90px -> 64px: bir xil yumshoqlik, kamroq GPU yuki */
   will-change: transform;
   transition: background 0.4s ease;
 }
@@ -321,6 +321,9 @@ html.light .glass-liquid::before {
   --c-surf3:   rgba(255,255,255,.16);
   --c-panel:   rgba(8,9,14,.55);
   --c-nav:     rgba(18,19,26,.82);
+  /* Hero foto ustida glass kartalar ham QORONG'I bo'lishi shart — aks holda yorug' rejimda
+     --c-card oq bo'lib qoladi va krem matn oq ustida qo'shilib ketadi. */
+  --c-card:    rgba(12,13,19,.58);
   --c-glass:   linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
   --c-glass-sh:0 20px 50px rgba(0,0,0,.40);
 }
@@ -526,12 +529,12 @@ html.light .glass-liquid::before {
   --c-border2: rgba(255,255,255,.24);
 }
 /* Scroll'dagi qattiq holat — tema ranglari */
+/* Scroll'dagi qattiq holat — deyarli opaque fon (backdrop-filter OLIB TASHLANDI:
+   fixed header'da har scroll kadrida orqa fonni qayta blur qilish scroll'ni qotirardi). */
 .site-header--solid {
   color: var(--c-heading);
   background: var(--c-nav);
   border-bottom-color: var(--c-border2);
-  backdrop-filter: blur(18px) saturate(1.4);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
 }
 
 /* ══════════════════════════════════════════════════

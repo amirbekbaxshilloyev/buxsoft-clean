@@ -108,6 +108,16 @@ Process raqamlari (`01/02/03`, klass `text-white/15`) token-xaritada yo'q edi �
 **⚠️ Deploy:** buxsoft.uz'da ko'rinishi uchun serverda `git pull && npm run build && restart` SHART (ISR build-time'da prerender bo'ladi).
 **Repo gigienasi (majburiy emas):** `public/images/logo-mark.png` 1.3MB — lekin `next/image sizes="36px"` uni resize qiladi, foydalanuvchiga kichik boradi (runtime muammo emas). `IMG_4857/4858.PNG` originallar ishlatilmaydi — o'chirsa bo'ladi.
 
+### 11. Hero "raqamlarda" rang regressiyasi + scroll GPU jank (2026-07-20)
+**A) Rang bug (regressiya):** `--c-card` qo'shilishi (bosqich 8) hero stats blokini yorug' rejimда buzgan — `.hero-section` `--c-card`ni qayta belgilamagani uchun outer glass OQ bo'lib, ustidagi dark panel loyqa kulrangga aylanib, krem matn qo'shilib ketgan.
+  - **Yechim:** `.hero-section` ga `--c-card: rgba(12,13,19,.58)` qo'shildi. Endi hero glass qorong'i, kontrast: label **9.77**, raqamlar **15.09** (WCAG AA dan yuqori). Skrinshot bilan tasdiqlandi.
+**B) Scroll qotishi (GPU/paint, JS emas — longTasks=0):**
+  - Header `backdrop-filter: blur(18px)` OLIB TASHLANDI (fixed header har scroll kadrida orqa fonni qayta blur qilardi — klassik scroll-jank). O'rniga `--c-nav` deyarli opaque (.95 dark / .96 light).
+  - `--c-nav` opacity oshirildi (backdrop-blur o'rniga).
+  - `bg-blob` blur `90px → 64px` (kamroq GPU).
+  - **Natija: backdrop-filter butun sahifada 17 → 0.** Scroll paytida asosiy GPU yuki yo'qoldi. Skrinshot vositasi ham endi ishlaydi (ilgari animatsiyalar tufayli timeout berardi).
+  - Lenis smooth-scroll qoldi (premium his) — GPU yuki ketgani uchun endi silliq.
+
 ## Ochiq qolgan ishlar (kelishilgan, hali qilinmagan)
 1. **`TARIFFS.features_ru` to'ldirish** (Sheet) — yuqorida.
 2. **Til: yangi kontent qo'shilsa `_ru`ni ham to'ldirish** (foydalanuvchi zimmasida).
