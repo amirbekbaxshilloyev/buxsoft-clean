@@ -118,6 +118,14 @@ Process raqamlari (`01/02/03`, klass `text-white/15`) token-xaritada yo'q edi �
   - **Natija: backdrop-filter butun sahifada 17 → 0.** Scroll paytida asosiy GPU yuki yo'qoldi. Skrinshot vositasi ham endi ishlaydi (ilgari animatsiyalar tufayli timeout berardi).
   - Lenis smooth-scroll qoldi (premium his) — GPU yuki ketgani uchun endi silliq.
 
+### 12. tsParticles olib tashlandi + dev-vs-prod tahlili (2026-07-22)
+**Kontekst:** foydalanuvchi "localhost'da ham qotyapti" dedi.
+**Tahlil:** production build (`next start`) o'lchandi — scroll paytida **longTasks=0**, event-loop lag p50 **1.7ms**, sahifa **0.04s**. Ya'ni JS main-thread toza; localhost:3000 (`next dev`) sekinligi asosan **dev-rejim** (HMR, minifikatsiyasiz, dev React). Haqiqiy sayt bunday qotmaydi.
+**Bajarildi:** `tsParticles` to'liq olib tashlandi (BuxSoftApp effekt+ref+div, layout Script, window tipi) — 763×694 kanvas 18 ta zo'rg'a ko'rinadigan zarra uchun doimiy qayta chizardi. Endi sahifada **kanvas 0**.
+**Jami holat:** backdrop-filter 0 · grain statik · kanvas 0 · WebGL yo'q (BgCanvas/CustomCursor umuman render bo'lmaydi — dead code).
+**Qolgan yagona doimiy scroll yuki:** Lenis smooth-scroll (`components/SmoothScrollProvider.tsx`, `lerp:0.09`) + composited bloblar. Lenis — premium his uchun; agar deploy'dan keyin ham qotish sezilsa, uni olib tashlab native scroll'ga o'tish mumkin (kafolatli silliq, lekin oddiy his). Foydalanuvchi tanlovi kutilyapti.
+**⚠️ Dead code:** `components/BgCanvas.tsx` va `components/CustomCursor.tsx` hech qayerda import qilinmagan — o'chirsa bo'ladi.
+
 ## Ochiq qolgan ishlar (kelishilgan, hali qilinmagan)
 1. **`TARIFFS.features_ru` to'ldirish** (Sheet) — yuqorida.
 2. **Til: yangi kontent qo'shilsa `_ru`ni ham to'ldirish** (foydalanuvchi zimmasida).
