@@ -61,7 +61,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <TelegramFloat />
         </LangProvider>
 
-        <Script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js" strategy="lazyOnload" />
         <Script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" strategy="afterInteractive" />
       </body>
     </html>

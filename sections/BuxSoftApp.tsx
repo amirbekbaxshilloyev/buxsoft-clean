@@ -11,7 +11,6 @@ import { useI18n } from "@/lib/i18n";
 
 declare global {
   interface Window {
-    tsParticles?: { load: (id: string, opts: object) => void };
     Swiper?: new (el: Element, opts: object) => { destroy: () => void };
   }
 }
@@ -84,7 +83,6 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
 
   const heroTitle    = s(data, "hero_title", "Soliq tekshiruvlariga oldindan tayyorlaymiz");
   const typedRef     = useRef<HTMLSpanElement>(null);
-  const particlesRef = useRef<HTMLDivElement>(null);
 
   /* navbar + scroll-progress (fon gradienti scroll bilan jonlanadi) */
   useEffect(() => {
@@ -148,32 +146,8 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
     return () => ctx?.revert();
   }, []);
 
-  /* tsParticles */
-  useEffect(() => {
-    let cancel = false;
-    function tryLoad() {
-      if (cancel || !particlesRef.current) return;
-      /* Faqat desktopda — mobilda ortiqcha animatsiyalarni kamaytirish uchun */
-      if (window.innerWidth < 768) return;
-      if (!window.tsParticles) { setTimeout(tryLoad, 200); return; }
-      particlesRef.current.id = "tsparticles-hero";
-      window.tsParticles.load("tsparticles-hero", {
-        particles: {
-          number: { value: 18, density: { enable: true } },
-          color:  { value: ["#ffffff", "#5B8CFF", "#C9A54B"] },
-          opacity: { value: 0.12, random: true },
-          size:   { value: { min: 1, max: 3 }, random: true },
-          move:   { enable: true, speed: 0.4, direction: "none", random: true, outModes: "bounce" },
-          links:  { enable: false },
-        },
-        interactivity: { events: { onHover: { enable: false }, onClick: { enable: false } } },
-        detectRetina: false,
-        fpsLimit: 25,
-      });
-    }
-    tryLoad();
-    return () => { cancel = true; };
-  }, []);
+  /* tsParticles OLIB TASHLANDI — 763×694 kanvas 18 ta zo'rg'a ko'rinadigan zarra uchun
+     doimiy qayta chizardi (scroll'ga ortiqcha GPU yuki). Dizayn ta'siri deyarli yo'q. */
 
   /* Swiper */
   useEffect(() => {
@@ -215,7 +189,6 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
           <div className="hero-photo-scrim absolute inset-0" />
         </div>
         <div className="hero-gradient-overlay" />
-        <div ref={particlesRef} className="absolute inset-0 pointer-events-none z-[1]" />
 
         <div className="relative z-[2] mx-auto max-w-7xl px-4 pt-24 sm:px-6 sm:pt-28 lg:px-8">
           <div className="grid items-center gap-10 lg:grid-cols-[1.08fr_.92fr]">
