@@ -143,7 +143,21 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
         });
       });
     })();
-    return () => ctx?.revert();
+
+    /* Xavfsizlik to'ri: agar GSAP/ScrollTrigger biror sabab bilan ishga tushmasa,
+       viewport ichidagi (ko'rinadigan) reveal elementlari 3s dan keyin majburan ochiladi —
+       kontent hech qachon ko'rinmay qolmaydi. Pastdagi elementlar scroll animatsiyasini saqlaydi. */
+    const failsafe = window.setTimeout(() => {
+      document.querySelectorAll<HTMLElement>("[data-reveal], [data-reveal-child]").forEach((el) => {
+        const inView = el.getBoundingClientRect().top < window.innerHeight;
+        if (inView && Number(getComputedStyle(el).opacity) < 0.1) {
+          el.style.visibility = "visible";
+          el.style.opacity = "1";
+        }
+      });
+    }, 3000);
+
+    return () => { clearTimeout(failsafe); ctx?.revert(); };
   }, []);
 
   /* tsParticles OLIB TASHLANDI — 763×694 kanvas 18 ta zo'rg'a ko'rinadigan zarra uchun
