@@ -84,15 +84,15 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
   const heroTitle    = s(data, "hero_title", "Soliq tekshiruvlariga oldindan tayyorlaymiz");
   const typedRef     = useRef<HTMLSpanElement>(null);
 
-  /* navbar + scroll-progress (fon gradienti scroll bilan jonlanadi) */
+  /* navbar solid holati — faqat scrollY tekshiruvi (arzon, reflow yo'q).
+     Ilgari bu handler har scroll'da scrollHeight o'qib (majburiy layout reflow) va
+     --bx-scroll o'zgartirib (butun fon repaint) scroll'ni qotirar edi — olib tashlandi. */
   useEffect(() => {
+    let ticking = false;
     const fn = () => {
-      setScrolled(window.scrollY > 60);
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      document.documentElement.style.setProperty(
-        "--bx-scroll",
-        String(max > 0 ? Math.min(window.scrollY / max, 1) : 0)
-      );
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { setScrolled(window.scrollY > 60); ticking = false; });
     };
     fn();
     window.addEventListener("scroll", fn, { passive: true });

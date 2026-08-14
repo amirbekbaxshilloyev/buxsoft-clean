@@ -1,29 +1,10 @@
 "use client";
-import { useEffect } from "react";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 
+/* NATIVE SCROLL — Lenis (JS smooth-scroll) OLIB TASHLANDI.
+   Lenis har kadrda butun sahifani transform bilan suradi va scroll hodisalarini
+   yuqori chastotada yuboradi — effektli sahifada bu qotishga sabab bo'lardi.
+   Brauzerning o'z native scroll'i GPU-tezlashtirilgan va hech qachon qotmaydi.
+   GSAP ScrollTrigger reveal animatsiyalari native scroll bilan avtomatik ishlaydi. */
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
-  const reduced = useReducedMotion();
-
-  useEffect(() => {
-    if (reduced) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let lenis: any = null;
-
-    (async () => {
-      const Lenis = (await import("lenis")).default;
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-
-      lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
-      lenis.on("scroll", ScrollTrigger.update);
-      gsap.ticker.add((t: number) => lenis.raf(t * 1000));
-      gsap.ticker.lagSmoothing(0);
-    })();
-
-    return () => { lenis?.destroy(); };
-  }, [reduced]);
-
   return <>{children}</>;
 }

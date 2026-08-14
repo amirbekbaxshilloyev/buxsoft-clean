@@ -121,22 +121,20 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ══════════════════════════════════════════════════
    BACKGROUND SYSTEM — grid + nozik suzuvchi bloblar
-   Scroll bilan jonlanadigan gradient fon: --bx-scroll (0..1) JS'dan yangilanadi
+   STATIK fon — ilgari --bx-scroll bilan har scroll kadrida butun sahifa gradienti
+   qayta chizilardi (asosiy scroll-jank sababi). Endi bir marta chiziladi.
 ══════════════════════════════════════════════════ */
 .bg-premium {
   background:
-    radial-gradient(circle at calc(12% + var(--bx-scroll, 0) * 50%) 6%,
-      var(--c-glow1), transparent 40%),
-    radial-gradient(circle at calc(85% - var(--bx-scroll, 0) * 35%) calc(12% + var(--bx-scroll, 0) * 50%),
-      var(--c-glow2), transparent 38%),
-    radial-gradient(circle at 50% calc(80% - var(--bx-scroll, 0) * 20%),
-      var(--c-glow3), transparent 44%),
+    radial-gradient(circle at 30% 6%, var(--c-glow1), transparent 40%),
+    radial-gradient(circle at 72% 34%, var(--c-glow2), transparent 38%),
+    radial-gradient(circle at 50% 72%, var(--c-glow3), transparent 44%),
     linear-gradient(180deg, var(--c-bg) 0%, var(--c-bg-alt) 55%, var(--c-bg) 100%);
 }
 html.light .bg-premium {
   background:
-    radial-gradient(circle at calc(12% + var(--bx-scroll, 0) * 50%) 4%, var(--c-glow1), transparent 34%),
-    radial-gradient(circle at calc(85% - var(--bx-scroll, 0) * 35%) calc(12% + var(--bx-scroll, 0) * 50%), var(--c-glow2), transparent 30%),
+    radial-gradient(circle at 30% 4%, var(--c-glow1), transparent 34%),
+    radial-gradient(circle at 72% 34%, var(--c-glow2), transparent 30%),
     var(--c-bg);
 }
 
