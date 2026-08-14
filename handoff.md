@@ -126,6 +126,17 @@ Process raqamlari (`01/02/03`, klass `text-white/15`) token-xaritada yo'q edi �
 **Qolgan yagona doimiy scroll yuki:** Lenis smooth-scroll (`components/SmoothScrollProvider.tsx`, `lerp:0.09`) + composited bloblar. Lenis — premium his uchun; agar deploy'dan keyin ham qotish sezilsa, uni olib tashlab native scroll'ga o'tish mumkin (kafolatli silliq, lekin oddiy his). Foydalanuvchi tanlovi kutilyapti.
 **⚠️ Dead code:** `components/BgCanvas.tsx` va `components/CustomCursor.tsx` hech qayerda import qilinmagan — o'chirsa bo'ladi.
 
+### 13. Scroll qotishi HAL QILINDI — Lenis + scroll-linked repaint (2026-07-22)
+**Hal qiluvchi ipuchi (foydalanuvchi):** desktopда qotadi, telefonда qotmaydi.
+**Sabab:** `Lenis` `smoothWheel:true` faqat sichqoncha g'ildiragini (desktop) ushlaydi va har kadrda sahifani transform qiladi + scroll hodisasini yuqori chastotada yuboradi. Bu esa BuxSoftApp scroll handler'ini ishga tushirib, u har kadrda `scrollHeight` o'qib (majburiy reflow) va `--bx-scroll` o'zgartirib (`.bg-premium` butun sahifa gradientini repaint) qotirar edi. Telefon native touch scroll ishlatgani uchun Lenis aralashmasdi → silliq.
+**Yechim:**
+- `SmoothScrollProvider`: Lenis butunlay olib tashlandi → native scroll (GPU-tez, ScrollTrigger reveal'lar native scroll bilan avtomatik ishlaydi). `lenis` paketi endi ishlatilmaydi (package.json'da qoldi, zararsiz).
+- `.bg-premium`: `--bx-scroll` bog'liqligi olib tashlandi → **statik fon** (scroll'da repaint yo'q).
+- BuxSoftApp scroll handler: `scrollHeight` o'qish + `--bx-scroll` olib tashlandi, `requestAnimationFrame` throttle bilan faqat `scrolled` (header solid) holati.
+- Reveal effektiga **xavfsizlik to'ri**: viewport ichidagi elementlar 3s ichida ochilmasa majburan ko'rsatiladi (kontent hech qachon yashirin qolmaydi).
+- `tsconfig.json`: `buxsoft-cms-ready` (bog'liqmas papka) exclude qilindi.
+**⚠️ Loyiha papkasi ko'chdi:** `buxsoft-clean` → **`D:\0001 BUXSOFT\Web`** (2026-07-22). Repo/remote o'sha (amirbekbaxshilloyev/buxsoft-clean).
+
 ## Ochiq qolgan ishlar (kelishilgan, hali qilinmagan)
 1. **`TARIFFS.features_ru` to'ldirish** (Sheet) — yuqorida.
 2. **Til: yangi kontent qo'shilsa `_ru`ni ham to'ldirish** (foydalanuvchi zimmasida).
