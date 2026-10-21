@@ -14,8 +14,10 @@ const CONFIG = {
   },
 };
 
-function doGet() {
+function doGet(e) {
   try {
+    // Material Hisobot boti arizalarni o'qiydi (faqat o'qish, kalit bilan) — `readLeadsForBot`
+    if (e && e.parameter && e.parameter.action === 'leads') return jsonResponse(readLeadsForBot(e.parameter));
     return jsonResponse({ success: true, data: getWebsiteContent(), timestamp: new Date().toISOString() });
   } catch (error) {
     return jsonResponse({ success: false, message: error.message || 'Unknown server error' });
@@ -163,6 +165,43 @@ function sendTelegramNotification(lead) {
 
 function escapeTelegram(value) {
   return String(value || '').replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
+}
+
+/**
+ * 🌐 Material Hisobot boti uchun: LEADS varag'idagi yangi arizalar (faqat o'qish).
+ * `key` — Script Properties'dagi BOT_LEADS_KEY bilan bir xil bo'lishi shart (`botKey()` yaratadi).
+ * `after` — bot oxirgi ko'rgan qator; yo'q bo'lsa faqat oxirgi qator raqami qaytadi (eski arizalar yuborilmaydi).
+ */
+function readLeadsForBot(p) {
+  const expected = PropertiesService.getScriptProperties().getProperty('BOT_LEADS_KEY');
+  if (!expected || String(p.key || '') !== expected) return { success: false, message: 'Kalit noto‘g‘ri' };
+  const sheet = getSpreadsheet().getSheetByName(CONFIG.SHEETS.LEADS);
+  if (!sheet) return { success: false, message: 'LEADS sheet not found' };
+  const lastRow = sheet.getLastRow();
+  if (p.after === undefined || p.after === '') return { success: true, last: lastRow, leads: [] };
+  const after = Math.max(1, Number(p.after) || 1);
+  if (lastRow <= after) return { success: true, last: lastRow, leads: [] };
+  const to = Math.min(lastRow, after + 50);
+  const keys = ['date', 'name', 'company', 'phone', 'telegram', 'industry', 'tariff', 'services', 'total', 'comment', 'status'];
+  const values = sheet.getRange(after + 1, 1, to - after, keys.length).getValues();
+  const leads = values.map(function (r, i) {
+    const o = { row: after + 1 + i };
+    keys.forEach(function (k, j) { o[k] = r[j] instanceof Date ? r[j].toISOString() : r[j]; });
+    return o;
+  });
+  return { success: true, last: to, leads: leads };
+}
+
+/** Bir marta muharrirda ishga tushiring (Run → botKey): kalit yaratadi va jurnalda ko'rsatadi — uni botga yozasiz */
+function botKey() {
+  const props = PropertiesService.getScriptProperties();
+  let key = props.getProperty('BOT_LEADS_KEY');
+  if (!key) {
+    key = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+    props.setProperty('BOT_LEADS_KEY', key);
+  }
+  Logger.log('Material Hisobot boti uchun kalit: ' + key);
+  return key;
 }
 
 function jsonResponse(payload) {

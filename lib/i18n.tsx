@@ -108,6 +108,10 @@ const UI: Record<string, { uz: string; ru: string }> = {
   individual:      { uz: "Individual", ru: "Индивидуально" },
 
   hero_stats_label:{ uz: "BuxSoft raqamlarda", ru: "BuxSoft в цифрах" },
+  mh_badge:        { uz: "Telegram-bot", ru: "Telegram-бот" },
+  mh_title:        { uz: "Material Hisobot — ombor hisobi o‘zi yuritiladi", ru: "Material Hisobot — складской учёт ведётся сам" },
+  mh_text:         { uz: "Didox fakturalaridan har bir firmaning material qoldig‘i, tannarxi, oborot-saldosi va soliq shaklidagi material hisoboti. Minuslar va imzosiz fakturalar haqida darhol xabar.", ru: "Из счетов-фактур Didox — остатки, себестоимость, оборотно-сальдовая ведомость и материальный отчёт в форме налоговой. Сразу сообщает о минусах и неподписанных фактурах." },
+  mh_cta:          { uz: "Botda 5 kun bepul sinash", ru: "Попробовать 5 дней бесплатно" },
   solution_see:    { uz: "Yechimni ko‘rish ↓", ru: "Посмотреть решение ↓" },
   solution_close:  { uz: "Yopish ↑", ru: "Свернуть ↑" },
   calc_price:      { uz: "Narxni hisoblash →", ru: "Рассчитать цену →" },

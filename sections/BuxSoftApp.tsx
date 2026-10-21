@@ -356,6 +356,31 @@ export function BuxSoftApp({ data }: { data: CmsData }) {
         </div>
       </section>
 
+      {/* MATERIAL HISOBOT — Telegram-bot (t.me/<bot>?start=site: bot saytdan kelganini biladi) */}
+      <section className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div
+          data-reveal="up"
+          className="glass flex flex-col items-start justify-between gap-5 rounded-[2rem] p-6 sm:flex-row sm:items-center sm:p-8"
+        >
+          <div className="flex items-start gap-4">
+            <div className="text-4xl">📦</div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[.24em] text-brand-goldlight">{t("mh_badge")}</p>
+              <h3 className="mt-1 text-xl font-black sm:text-2xl">{t("mh_title")}</h3>
+              <p className="mt-2 max-w-3xl text-slate-300">{t("mh_text")}</p>
+            </div>
+          </div>
+          <a
+            href={s(data, "material_bot_url", "https://t.me/material_reportbot?start=site")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-glow shrink-0 rounded-full bg-white px-6 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-100"
+          >
+            {t("mh_cta")}
+          </a>
+        </div>
+      </section>
+
       {/* WIZARD */}
       <section id="wizard" className="relative mx-auto max-w-4xl scroll-mt-8 px-4 py-12 sm:px-6 lg:px-8">
         <div data-reveal="up" className="mb-8 text-center">
